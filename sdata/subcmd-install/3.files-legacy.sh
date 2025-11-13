@@ -35,8 +35,7 @@ function copy_dir_s_t(){
 #####################################################################################
 # In case some dirs does not exists
 v mkdir -p $XDG_BIN_HOME $XDG_CACHE_HOME $XDG_CONFIG_HOME $XDG_DATA_HOME/icons
-firstrun_file="${XDG_CACHE_HOME}/.ii-qs-installed"
-if test -f "${firstrun_file}"; then
+if test -f "${FIRSTRUN_FILE}"; then
   firstrun=false
 else
   firstrun=true
@@ -89,9 +88,17 @@ esac
 case $SKIP_HYPRLAND in
   true) sleep 0;;
   *)
+    if ! [ -d "$XDG_CONFIG_HOME"/hypr ]; then v mkdir -p "$XDG_CONFIG_HOME"/hypr ; fi
     warning_rsync_delete; v rsync -av --delete dots/.config/hypr/hyprland/ "$XDG_CONFIG_HOME"/hypr/hyprland/
-    for i in hypr{land,idle,lock}.conf {monitors,workspaces}.conf ; do
+    for i in hypr{land,lock}.conf {monitors,workspaces}.conf ; do
       copy_file_s_t "dots/.config/hypr/$i" "${XDG_CONFIG_HOME}/hypr/$i"
+    done
+    for i in hypridle.conf ; do
+      if [[ "${INSTALL_VIA_NIX}" == true ]]; then
+        copy_file_s_t "dots-extra/via-nix/$i" "${XDG_CONFIG_HOME}/hypr/$i"
+      else
+        copy_file_s_t "dots/.config/hypr/$i" "${XDG_CONFIG_HOME}/hypr/$i"
+      fi
     done
     if [ "$OS_GROUP_ID" = "fedora" ];then
       v bash -c "printf \"# For fedora to setup polkit\nexec-once = /usr/libexec/kf6/polkit-kde-authentication-agent-1\n\" >> ${XDG_CONFIG_HOME}/hypr/hyprland/execs.conf"
@@ -107,4 +114,4 @@ declare -a arg_excludes=()
 # v rsync -av "dots/.local/bin/" "$XDG_BIN_HOME" # No longer needed since scripts are no longer in ~/.local/bin
 v cp -f "dots/.local/share/icons/illogical-impulse.svg" "${XDG_DATA_HOME}"/icons/illogical-impulse.svg
 
-v touch "${firstrun_file}"
+v touch "${FIRSTRUN_FILE}"
