@@ -32,6 +32,13 @@ ShellRoot {
         Updates.load()
     }
 
+    // Auto change Wallpaper
+    Timer {
+                interval: 2 * 60 * 60 * 1000 // h * m * s
+                running: true
+                repeat: true
+                onTriggered: Wallpapers.randomFromCurrentFolder()
+            }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]
